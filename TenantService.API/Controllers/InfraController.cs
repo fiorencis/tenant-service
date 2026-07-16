@@ -6,19 +6,21 @@ using TenantService.Application;
 namespace TenantService.API.Controllers;
 
 [ApiController]
-//[Authorize]
+[Authorize]
 [Route("api/infra")]
 public class InfraController : TenantBaseController
 {
+    protected readonly IInitService _initService;
     protected readonly IUserService _userService;
 
-    public InfraController(IUserService userService, IConfiguration configuration, ILogger<TenantBaseController> logger) : base(configuration, logger)
+    public InfraController(IInitService initService, IUserService userService, 
+        IConfiguration configuration, ILogger<TenantBaseController> logger) : base(configuration, logger)
     {
+        _initService = initService;
         _userService = userService;
     }
         
     [HttpGet("info")]
-    [Authorize]
     //[AllowAnonymous]
     public async Task<IActionResult> Info()
     { 
@@ -37,6 +39,23 @@ public class InfraController : TenantBaseController
         return Ok(data);
     }
 
+    [HttpPost("initialize")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Initialize()
+    {
+
+
+
+
+
+
+
+
+
+
+        
+            return Ok();    
+    }
 
     [HttpPost("add-user")]
     public async Task<IActionResult> AddUser([FromBody] UserOperationRequest request)

@@ -20,20 +20,28 @@ public class TokenCleanupService : BackgroundService
     {
         _logger.LogInformation($"Executing 'Token Cleanup Service' on {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}");
 
-        while (!ct.IsCancellationRequested)
+        try 
         {
-            await Task.Delay(TimeSpan.FromMinutes(1), ct);
 
-            _logger.LogInformation($"Deleting elapsed tokens...");
+            while (!ct.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromMinutes(1), ct);
 
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<TenantDbContext>();
+                _logger.LogInformation($"Deleting elapsed tokens...");
 
-            var expired = db.RefreshTokens
-                .Where(r => r.ExpiresAt < DateTime.UtcNow || r.IsRevoked);
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<TenantDbContext>();
 
-            db.RefreshTokens.RemoveRange(expired);
-            await db.SaveChangesAsync(ct);
+                var expired = db.RefreshTokens
+                    .Where(r => r.ExpiresAt < DateTime.UtcNow || r.IsRevoked);
+
+                db.RefreshTokens.RemoveRange(expired);
+                await db.SaveChangesAsync(ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
         }
     }
 }

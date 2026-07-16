@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="TenantService.Api/TenantService.API.csproj" />
+  <Project Path="TenantService.API/TenantService.API.csproj" />
   <Project Path="TenantService.Application/TenantService.Application.csproj" />
   <Project Path="TenantService.Domain/TenantService.Domain.csproj" />
   <Project Path="TenantService.Infrastructure/TenantService.Infrastructure.csproj" />

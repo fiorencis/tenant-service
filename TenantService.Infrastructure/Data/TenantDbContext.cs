@@ -13,6 +13,8 @@ public class TenantDbContext : DbContext
      
      public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+     public DbSet<DbUpdate> DbUpdates => Set<DbUpdate>();
+
      protected override void OnModelCreating(ModelBuilder modelBuilder)
      {
           modelBuilder.Entity<User>()
