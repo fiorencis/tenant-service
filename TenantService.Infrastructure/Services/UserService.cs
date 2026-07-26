@@ -71,12 +71,13 @@ public class UserService : ApplicationService, IUserService
 	}
 
 
-
-
-
-
 	public async Task<Guid> AddUserAsync(UserDto user, CancellationToken cancellationToken = default)
 	{
+		if (user.Id == null || string.IsNullOrWhiteSpace(user.Id))
+		{
+			user.Id = Guid.NewGuid().ToString();
+		}	
+
 		if (!Guid.TryParse(user.Id, out var userId))
 		{
 			throw new ArgumentException("Invalid user id.", nameof(user));

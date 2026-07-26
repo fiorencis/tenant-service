@@ -36,9 +36,12 @@ public class TokenService : ApplicationService, ITokenService
         ?? _config.GetValue<string>(jwt["Key"]) 
         ?? "supersecretkey1234567890!@#$%^&*()@@_$QuLoW%qwerty&potrimao99@###][";
 
+        var expiryMinutes = Environment.GetEnvironmentVariable("TOKEN_EXPIRY_MINUTES") ?? 
+        jwt["ExpiryMinutes"] ?? "60"; // Default to 60 minutes if not set
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiry = DateTime.UtcNow.AddMinutes(double.Parse(jwt["ExpiryMinutes"]!));
+        var expiry = DateTime.UtcNow.AddMinutes(double.Parse(expiryMinutes!));
 
         var claims = new[]
         {

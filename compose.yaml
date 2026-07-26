@@ -1,0 +1,29 @@
+#version: '3.9'
+
+services:
+  tenantservice:
+    container_name: tenantservice
+    image: tenantservice:latest
+   
+    # build:
+    #   context: .
+    #   dockerfile: TenantService.API/Dockerfile
+
+    ports:
+      - '8080:8080'
+      
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+      - Token__Key=${TOKEN_KEY}
+      - Token__ExpiryMinutes=${TOKEN_EXPIRY_MINUTES}
+
+      - Logging__LogLevel__Default=${LOGGING__LOGLEVEL__DEFAULT}
+      - Logging__LogLevel__Microsoft.AspNetCore=${LOGGING__LOGLEVEL__MICROSOFT__ASPNETCORE}
+    restart: unless-stopped
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

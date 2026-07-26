@@ -9,10 +9,10 @@
 -- Creates the infrastructure schema for the tenant service, which contains tables 
 -- and other database objects related to the service's internal operations and management.
 CREATE SCHEMA infra
-    AUTHORIZATION postgres;
+    AUTHORIZATION fiorencis;
 
 CREATE SCHEMA application
-    AUTHORIZATION postgres;
+    AUTHORIZATION fiorencis;
 
 CREATE TABLE IF NOT EXISTS infra.dbupdate
 (
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS infra.dbupdate
     CONSTRAINT dbupdate_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS infra.dbupdate OWNER to postgres;
+ALTER TABLE IF EXISTS infra.dbupdate OWNER to fiorencis;
 
 -- Table: infra.user - administrator's login accounts to manipulate tenants
 CREATE TABLE IF NOT EXISTS infra.user
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS infra.user
     CONSTRAINT user_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS infra.user OWNER to postgres;
+ALTER TABLE IF EXISTS infra.user OWNER to fiorencis;
 
 CREATE TABLE IF NOT EXISTS infra.acl
 (
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS infra.acl
     CONSTRAINT acl_pkey PRIMARY KEY (user_id, tenant_id)
 ) TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS infra.acl OWNER to postgres;    
+ALTER TABLE IF EXISTS infra.acl OWNER to fiorencis;    
 
 
 -- Table: application.tenant - tenants' information
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS application.tenant
     CONSTRAINT tenant_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;    
 
-ALTER TABLE IF EXISTS application.tenant OWNER to postgres; 
+ALTER TABLE IF EXISTS application.tenant OWNER to fiorencis; 
 
 CREATE TABLE IF NOT EXISTS application.license
 (
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS application.license
     CONSTRAINT tenant_license_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default; 
 
-ALTER TABLE IF EXISTS application.license OWNER to postgres;
+ALTER TABLE IF EXISTS application.license OWNER to fiorencis;
 
 
 ALTER TABLE IF EXISTS infra.user
