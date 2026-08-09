@@ -111,6 +111,54 @@ public class UserService : ApplicationService, IUserService
 		return newUser.Id;
 	}
 
+	public async Task<Guid> UpdateUserAsync(UserDto user, CancellationToken cancellationToken = default)
+	{
+		var userentity = await _userRepository.GetByIdAsync(Guid.Parse(user.Id), cancellationToken);
+
+		if (userentity == null)
+		{
+			throw new UserNotFoundException(user.Id);
+		}
+
+		var normalizedUsername = user.Username?.Trim();
+
+		if (string.IsNullOrWhiteSpace(normalizedUsername))
+		{
+			throw new ArgumentException("Username is required.", nameof(user));
+		}
+
+		if (await _userRepository.ExistsAsync(x => x.Username == normalizedUsername && x.Id != userentity.Id, cancellationToken))
+		{
+			throw new UsernameAlreadyExistsException(normalizedUsername);
+		}
+
+		// If new password is provided, hash it and update the PasswordHash property
+		var passwordHash = user.Password != null && user.Password.Length > 0
+			? _passwordHasher.HashPassword(user.Password)
+			: userentity.PasswordHash;		
+
+		var updUser = user.ToUpdateUser(userentity, passwordHash);
+		await _userRepository.UpdateAsync(updUser, cancellationToken);
+		await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+		return userentity.Id;
+	}
+
+	public async Task<bool> DeleteUserAsync(Guid userId, CancellationToken cancellationToken = default)
+	{
+		var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+
+		if (user == null)
+		{
+			throw new UserNotFoundException(userId);
+		}
+
+		await _userRepository.DeleteAsync(user, cancellationToken);
+		await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+		return true;
+	}
+
 	public async Task<UserDto> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
 	{
 		var user = await _userRepository.GetByIdAsync(userId, cancellationToken);

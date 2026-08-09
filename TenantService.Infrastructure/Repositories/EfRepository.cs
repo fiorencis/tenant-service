@@ -5,6 +5,7 @@ using TenantService.Application.Repositories;
 namespace TenantService.Infrastructure.Repositories;
 
 public class EfRepository<T> : IRepository<T> where T : class
+
 {
     protected readonly TenantDbContext DbContext;
     protected readonly DbSet<T> Set;
@@ -43,6 +44,19 @@ public class EfRepository<T> : IRepository<T> where T : class
     {
         return Set.AddAsync(entity, cancellationToken).AsTask();
     }
+
+    public Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    {
+        return Task.Run(() => Set.Update(entity), cancellationToken);
+    }
+
+
+    public Task DeleteAsync(T entity, CancellationToken cancellationToken)
+    {
+        return Task.Run(() => Set.Remove(entity), cancellationToken);
+    }
+
+
 
     public void Update(T entity)
     {

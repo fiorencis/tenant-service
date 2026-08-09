@@ -24,3 +24,6 @@ ENTRYPOINT ["dotnet", "TenantService.API.dll"]
 
 # Now you can build and run the Docker image with the following commands:
 # docker build -t tenant-service .
+
+# Or if you want to specify the Dockerfile path explicitly, use:
+# docker build -f .\TenantService.API\Dockerfile -t tenant-service .

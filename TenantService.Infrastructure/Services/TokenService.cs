@@ -148,7 +148,7 @@ public class TokenService : ApplicationService, ITokenService
 
         // Invalidate the old refresh token
         storedRefreshToken.IsRevoked = true;
-        _tokenRepository.Update(storedRefreshToken);
+        await _tokenRepository.UpdateAsync(storedRefreshToken);
 
         _logger.LogInformation("Refresh token {RefreshToken} for user {Username} has been revoked", storedRefreshToken.Token, username);
 

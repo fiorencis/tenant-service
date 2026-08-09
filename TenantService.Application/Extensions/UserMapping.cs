@@ -16,6 +16,19 @@ public static class UserMapping
             PasswordHash = passwordHash
     };
 
+    public static User ToUpdateUser(this UserDto dto, User user, string passwordHash)
+    {
+        
+        user.Username = dto.Username;
+        user.FullName = dto.FullName;
+        user.Email = dto.Email;
+        user.Admin = dto.Admin;
+        user.Status = (UserStatus)dto.Status;
+        user.PasswordHash = passwordHash;
+
+        return user;
+    }
+
     public static UserDto ToUserDto(this User user) => new()
     {
         Id = user.Id.ToString(),

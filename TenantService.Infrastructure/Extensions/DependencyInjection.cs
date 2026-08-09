@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
-using TenantService.Application.Repositories;
 using TenantService.Application;
 using TenantService.Infrastructure.Repositories;
 using TenantService.Infrastructure.Security;
 using TenantService.Infrastructure.Services;
 using TenantService.Application.Services;
+using TenantService.Application.Repositories;
 
 namespace TenantService.Infrastructure.Extensions;
 
@@ -21,4 +21,7 @@ public static class DependencyInjection
 
         return services;
     }
+
+    
+
 }

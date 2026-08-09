@@ -9,9 +9,20 @@ using TenantService.Application.Extensions;
 using TenantService.Infrastructure.Services;
 using Scalar.AspNetCore;
 using TenantService.API.Infrastructure;
+using TenantService.Application;
+using DotNetEnv;
 
 // create the web application builder
 var builder = WebApplication.CreateBuilder(args);
+
+// Load environment variables from .env file in development
+if (builder.Environment.IsDevelopment())
+{
+    Env.Load("../.env");
+}   
+
+// Add environment variables to the configuration
+builder.Configuration.AddEnvironmentVariables();
 
 // gets the configuration file settings
 IConfiguration config = builder.Configuration;
@@ -34,8 +45,8 @@ Log.Logger.Warning($"Logging initialized...");
 
 var jwt = config.GetSection("Jwt");
 
-var secret = Environment.GetEnvironmentVariable("TOKEN_KEY") 
-    ?? config.GetValue<string>(jwt["Key"]) 
+var secret = Environment.GetEnvironmentVariable("TOKEN_KEY")
+    ?? jwt["Key"]
     ?? "supersecretkey1234567890!@#$%^&*()@@_$QuLoW%qwerty&potrimao99@###][";
 
 Log.Logger.Warning($"Used JWT Secret Key: {secret}...");
@@ -94,6 +105,10 @@ builder.Services.AddCors(options =>
 
 builder.Host.UseSerilog();
 
+// Mappa e registra la sezione "PasswordSettings"
+builder.Services.Configure<PasswordSettings>(
+    builder.Configuration.GetSection("PasswordSettings"));
+
 builder.Services.AddDbContext<TenantDbContext>(options => options.UseNpgsql(conStr));
 builder.Services.AddInfrastructureServices();
 builder.Services.AddApplicationServices();
@@ -138,6 +153,7 @@ var localizationOptions = new RequestLocalizationOptions()
     .AddSupportedUICultures(supportedCultures);
 
 app.UseRequestLocalization(localizationOptions);
+
 
 app.Run();
             
