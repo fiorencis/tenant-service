@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TenantService.API.Controllers;
+using TenantService.API.Controllers.Auth;
 using TenantService.Application;
 using TenantService.Application.DTOs;
 using TenantService.Application.Services;
@@ -35,7 +36,27 @@ public class AuthController : TenantBaseController
 
         var tokenpair = await _tokenService.CreateTokenPair(request.Username, "Admin");
 
-        return Ok(tokenpair);
+        var loginResponse = new UserLoginResponse
+        {
+            AccessToken = tokenpair.AccessToken,
+            RefreshToken = tokenpair.RefreshToken,
+            Success = true,
+            Message = "Login successful"
+        };
+
+         var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/auth/refresh",
+            MaxAge = TimeSpan.FromDays(7),
+            IsEssential = true
+        };
+
+        Response.Cookies.Append("refreshToken", tokenpair.RefreshToken, cookieOptions);
+
+        return Ok(loginResponse);
     }
 
     // Tenant service user logout procedure by refresh token invalidation
@@ -50,6 +71,24 @@ public class AuthController : TenantBaseController
 
 
         return Ok(tokenpair);
+    }
+
+    [HttpPost("logout")]
+    [AllowAnonymous]    
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    {
+        // 1. Invalida il Refresh Token nel Database/Cache
+        var success = await _tokenService.RevokeRefreshTokenAsync(request.RefreshToken);
+        
+        if (!success)
+        {
+            return BadRequest("Token non valido o già scaduto.");
+        }
+
+        // 2. Se usi i Cookie HttpOnly, cancella il cookie impostando la data passata
+        Response.Cookies.Delete("refreshToken");
+
+        return Ok(new { message = "Logout effettuato con successo." });
     }
 
 }

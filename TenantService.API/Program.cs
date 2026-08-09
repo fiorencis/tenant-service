@@ -100,6 +100,11 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .WithHeaders("Authorization", "Content-Type")
                 .AllowCredentials();
+
+        policy.WithOrigins("http://localhost:4200") // Permette Angular
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+        
     });
 });
 
@@ -123,7 +128,7 @@ builder.Services.AddProblemDetails();
 var app = builder.Build();
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -11,6 +11,6 @@ public interface ITokenService : IApplicationService
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
     Task<TokenPairDto> CreateTokenPair(string username, string role, CancellationToken cancellationToken = default);
 
-
     Task<TokenPairDto> RefreshTokenPairAsync(string accessToken, string refreshToken);
+    Task<bool> RevokeRefreshTokenAsync(string refreshToken);
 }

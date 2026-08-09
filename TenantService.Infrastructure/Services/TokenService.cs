@@ -154,4 +154,25 @@ public class TokenService : ApplicationService, ITokenService
 
         return await CreateTokenPair(username, principal.FindFirst(ClaimTypes.Role)?.Value ?? "User");
     }
+
+    public async Task<bool> RevokeRefreshTokenAsync(string token)
+    {
+        var refreshTokenEntityList = await _tokenRepository.ListAsync(t => t.Token == token && !t.IsRevoked);
+        var refreshTokenEntity = refreshTokenEntityList.FirstOrDefault();
+
+        if (refreshTokenEntity == null) return false;
+
+        _logger.LogInformation("Revoking refresh token {RefreshToken} for user {Username}", 
+            refreshTokenEntity.Token, refreshTokenEntity.Username);
+
+        // Disattiva il token impostando la data di revoca
+        refreshTokenEntity.ExpiresAt = DateTime.UtcNow;
+        refreshTokenEntity.IsRevoked = true;
+
+        await _tokenRepository.UpdateAsync(refreshTokenEntity);
+        await _unitOfWork.SaveChangesAsync();
+        
+        return true;
+    }
+
 }
