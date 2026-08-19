@@ -94,17 +94,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
 
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AngularAppPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5040") // L'URL del tuo frontend
+        policy.WithOrigins("http://localhost:4200", "http://localhost:5040") // L'URL del tuo frontend
                 .AllowAnyMethod()
-                .WithHeaders("Authorization", "Content-Type")
-                .AllowCredentials();
-
-        policy.WithOrigins("http://localhost:4200") // Permette Angular
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-        
+                .AllowAnyHeader()
+                .AllowCredentials();        
     });
 });
 
@@ -128,7 +123,7 @@ builder.Services.AddProblemDetails();
 var app = builder.Build();
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+app.UseCors("AngularAppPolicy");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

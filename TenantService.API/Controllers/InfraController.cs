@@ -27,7 +27,7 @@ public class InfraController : TenantBaseController
     }
         
     [HttpGet("info")]
-    [AllowAnonymous]
+    //[AllowAnonymous]
     public async Task<IActionResult> Info()
     { 
         _logger.LogDebug("Service Info request");
