@@ -143,20 +143,28 @@ public class AuthController : TenantBaseController
 
     [HttpPost("logout")]
     [AllowAnonymous]    
-    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    public async Task<IActionResult> Logout()
     {
-        // 1. Invalida il Refresh Token nel Database/Cache
-        var success = await _tokenService.RevokeRefreshTokenAsync(request.RefreshToken);
-        
-        if (!success)
+         var refreshToken = Request.Cookies["X-Refresh-Token"];
+
+         _logger.LogDebug("LOGOUT REFRESH TOKEN: {refreshtoken}", refreshToken );
+
+        if (!string.IsNullOrEmpty(refreshToken))
         {
-            return BadRequest("Token non valido o già scaduto.");
+            // 1. Invalida il Refresh Token nel Database/Cache
+            var success = await _tokenService.RevokeRefreshTokenAsync(refreshToken);
+
+            if (!success)
+            {
+                return BadRequest("Token non valido o già scaduto.");
+            }
         }
 
         // 2. Se usi i Cookie HttpOnly, cancella il cookie impostando la data passata
-        Response.Cookies.Delete(RefreshTokenCookieName);
+        Response.Cookies.Delete("X-Refresh-Token");
 
         return Ok(new { message = "Logout effettuato con successo." });
+        //return NoContent();
     }
 
 }
