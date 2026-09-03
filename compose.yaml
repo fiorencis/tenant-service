@@ -24,6 +24,12 @@ services:
     networks:
       - default
 
+    volumes:
+      - tenantservice_data:/data
+
 networks:
   default:
     driver: bridge
+
+volumes:
+   tenantservice_data:

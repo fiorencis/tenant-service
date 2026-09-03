@@ -21,5 +21,5 @@ public interface IUserService : IApplicationService
 
 	Task<UserDto> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
 	
-	
+	Task<string> GetUserImagePath(Guid userId);
 }

@@ -94,6 +94,9 @@ public class TenantDbContext : DbContext
                .IsRequired().HasDefaultValue(UserStatus.Active);
 
 
+          // RefreshToken entity
+          // ===========================================
+          
           modelBuilder.Entity<RefreshToken>()
                .ToTable("refreshtoken", "infra") 
                .HasKey(u => u.Id).HasName("refresh_token_pkey"); 

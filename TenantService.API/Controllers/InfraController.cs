@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Npgsql.Internal;
 using TenantService.Application;
 
 namespace TenantService.API.Controllers;
@@ -101,6 +102,23 @@ public class InfraController : TenantBaseController
         return Ok(user);
     }
 
+    [HttpGet("{id}/avatar")]
+    public async Task<IActionResult> GetAvatar(Guid id)
+    {
+        _logger.LogWarning(">>> GetAvatar chiamato: {Method} {Id}", Request.Method, id);
+
+         var path = await _userService.GetUserImagePath(id);
+
+        if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
+        {
+            _logger.LogWarning("Avatar non trovato per utente {Id}", id);
+            return NotFound();
+        }
+
+        return PhysicalFile(path, "image/webp");
+    }
+
+
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
@@ -125,4 +143,13 @@ public class InfraController : TenantBaseController
 
         return Ok();
     }
+
+
+    [AllowAnonymous]
+    [HttpGet("test")]
+    public IActionResult Test()
+    {
+        return Ok("OK");
+    }
+
 }

@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using TenantService.Application;
 using TenantService.Application.DTOs;
@@ -21,15 +22,16 @@ public class UserService : ApplicationService, IUserService
 	private readonly IRepository<User> _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IPasswordHasher _passwordHasher;
-	
+	private readonly DataFoldersOptions _folders;
+
 	public UserService(IRepository<User> userRepository, IUnitOfWork unitOfWork, 
-		IPasswordHasher passwordHasher, IConfiguration config, 
+		IPasswordHasher passwordHasher, IConfiguration config, IOptions<DataFoldersOptions> folders,
 		ILogger<UserService> logger) : base(config,logger)
 	{
 		_userRepository = userRepository;
 		_unitOfWork = unitOfWork;
 		_passwordHasher = passwordHasher;
-
+		_folders = folders.Value;
 	}
 
 	public async Task<Result<Guid>> ValidateUserCredentialsAsync(string username, string password, 
@@ -191,10 +193,14 @@ public class UserService : ApplicationService, IUserService
 		return user.FirstOrDefault()!.ToUserDto();
 	}
 
-	
-	
-
-
+	public async Task<string> GetUserImagePath(Guid userId)
+    {
+        return Path.Combine(
+            _folders.ImageDirectory,
+			"users",
+            userId.ToString(),
+            "avatar.webp");
+    }
 
 
 

@@ -94,12 +94,21 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
 
+    // options.AddPolicy("AngularAppPolicy", policy =>
+    // {
+    //     policy
+    //         .WithOrigins("http://localhost:4200")
+    //         .AllowCredentials()
+    //         .WithHeaders("Authorization", "Content-Type")
+    //         .WithMethods("GET", "OPTIONS");
+    // });
+
     options.AddPolicy("AngularAppPolicy", policy =>
     {
         policy.WithOrigins("http://localhost:4200", "http://localhost:5040") // L'URL del tuo frontend
-                .AllowAnyMethod()
+                .AllowCredentials()
                 .AllowAnyHeader()
-                .AllowCredentials();        
+                .AllowAnyMethod();        
     });
 });
 
@@ -108,6 +117,8 @@ builder.Host.UseSerilog();
 // Mappa e registra la sezione "PasswordSettings"
 builder.Services.Configure<PasswordSettings>(
     builder.Configuration.GetSection("PasswordSettings"));
+builder.Services.Configure<DataFoldersOptions>(
+    builder.Configuration.GetSection("DataFolders"));
 
 builder.Services.AddDbContext<TenantDbContext>(options => options.UseNpgsql(conStr));
 builder.Services.AddInfrastructureServices();
@@ -121,14 +132,31 @@ builder.Services.AddProblemDetails();
 //builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 var app = builder.Build();
-app.UseExceptionHandler();
-app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine(
+        $">>> HTTP {context.Request.Method} {context.Request.Path}");
+
+    await next();
+
+    Console.WriteLine(
+        $"<<< HTTP {context.Response.StatusCode} {context.Request.Method} {context.Request.Path}");
+});
+
+app.UseRouting();
 app.UseCors("AngularAppPolicy");
+
+app.UseExceptionHandler();
+
+if (!app.Environment.IsDevelopment()) {
+    app.UseHttpsRedirection();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    Log.Logger.Warning("USING SCALAR / OPENAPI!!!");
+    Log.Logger.Debug("USING SCALAR / OPENAPI!!!");
     app.MapOpenApi();
     
     // Genera l'interfaccia grafica Scalar invece di Swagger
