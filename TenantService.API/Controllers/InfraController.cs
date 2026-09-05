@@ -105,7 +105,7 @@ public class InfraController : TenantBaseController
     [HttpGet("{id}/avatar")]
     public async Task<IActionResult> GetAvatar(Guid id)
     {
-        _logger.LogWarning(">>> GetAvatar chiamato: {Method} {Id}", Request.Method, id);
+        _logger.LogWarning(">>> GETAVATAR chiamato: {Method} {Id}", Request.Method, id);
 
          var path = await _userService.GetUserImagePath(id);
 
@@ -116,6 +116,62 @@ public class InfraController : TenantBaseController
         }
 
         return PhysicalFile(path, "image/webp");
+    }
+
+    [HttpPut("{id}/avatar")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> UploadAvatar(
+        Guid id,
+        [FromForm] IFormFile avatar,
+        CancellationToken cancellationToken)
+    {
+        if (avatar == null || avatar.Length == 0)
+        {
+            return BadRequest("Avatar is required.");
+        }
+
+        // if (!string.Equals(avatar.ContentType, "image/webp", StringComparison.OrdinalIgnoreCase))
+        // {
+        //     return BadRequest("Only WebP images are supported.");
+        // }
+
+        var path = await _userService.GetUserImagePath(id);
+        var directory = Path.GetDirectoryName(path);
+
+        _logger.LogWarning(">>> UPLOADAVATAR called for user {Id}, saving to path: {Path}", id, path);
+
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        Directory.CreateDirectory(directory);
+        var temporaryPath = path + ".tmp";
+
+        try
+        {
+            await using (var stream = new FileStream(
+                temporaryPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 64 * 1024,
+                useAsync: true))
+            {
+                await avatar.CopyToAsync(stream, cancellationToken);
+            }
+
+            System.IO.File.Move(temporaryPath, path, overwrite: true);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(temporaryPath))
+            {
+                System.IO.File.Delete(temporaryPath);
+            }
+        }
+
+        return NoContent();
     }
 
 

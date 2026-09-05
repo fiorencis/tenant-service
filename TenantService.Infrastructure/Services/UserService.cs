@@ -214,7 +214,6 @@ public class UserService : ApplicationService, IUserService
 
 
 
-
 	public async Task<string> GenerateJwtTokenAsync(Guid userId)
 	{
 		var user = await _userRepository.GetByIdAsync(userId);
@@ -250,5 +249,6 @@ public class UserService : ApplicationService, IUserService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
 
 }
