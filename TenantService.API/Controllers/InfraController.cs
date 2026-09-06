@@ -174,6 +174,25 @@ public class InfraController : TenantBaseController
         return NoContent();
     }
 
+    [HttpDelete("{id}/avatar")]
+    public async Task<IActionResult> DeleteAvatar(Guid id, CancellationToken cancellationToken)
+    {
+        var path = await _userService.GetUserImagePath(id);
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return NotFound();
+        }
+
+        if (!System.IO.File.Exists(path))
+        {
+            return NotFound();
+        }
+
+        System.IO.File.Delete(path);
+
+        return NoContent();
+    }
 
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
