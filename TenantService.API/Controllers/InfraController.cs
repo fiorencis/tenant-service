@@ -220,6 +220,49 @@ public class InfraController : TenantBaseController
     }
 
 
+    [HttpPost("verify-password")]
+    public async Task<IActionResult> VerifyPassword([FromBody] VerifyPasswordRequest request)
+    {
+        _logger.LogInformation($"Verifying password for User {request}");
+
+        try 
+        {
+            var isValid = await _userService.VerifyUserPasswordAsync(request.UserId, request.Password);
+
+            return Ok(new { IsValid = isValid, success = true, message = isValid ? "Password is valid." : "Password is invalid." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error verifying password for user {UserId}", request.UserId);
+            return StatusCode(500, "An error occurred while verifying the password.");
+        }
+
+    }
+
+    [HttpPost("validate-password")]
+    public async Task<IActionResult> ValidatePassword([FromBody] VerifyPasswordRequest request)
+    {
+        _logger.LogInformation($"Validating password for User {request}");
+
+        try
+        {
+            if (!PasswordHelper.ValidatePassword(request.Password, _passwordSettings, out string errorMessage))
+            {
+                return Ok(new { IsValid = false, success = true, message = errorMessage });
+            } 
+
+            return Ok(new { IsValid = true, success = true, message = "Password is valid." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating password for user {UserId}", request.UserId);
+            return StatusCode(500, "An error occurred while validating the password."); 
+        }
+        
+    }
+
+
+
     [AllowAnonymous]
     [HttpGet("test")]
     public IActionResult Test()

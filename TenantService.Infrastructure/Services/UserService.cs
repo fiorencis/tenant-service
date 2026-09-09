@@ -203,7 +203,17 @@ public class UserService : ApplicationService, IUserService
     }
 
 
+	public async Task<bool> VerifyUserPasswordAsync(string userId, string password)
+	{
+		var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
 
+		if (user == null)
+		{
+			throw new UserNotFoundException(userId);
+		}
+
+		return _passwordHasher.VerifyPassword(password, user.PasswordHash);
+	}
 
 
 

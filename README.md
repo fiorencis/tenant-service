@@ -27,3 +27,7 @@ Esempio:
 cd c:\fiorencis\projects\tenantService\src\TenantService
 dotnet run
 ```
+
+# Build docker image
+Execute in TenantService.API folder:
+docker build -t dhub.fiorencis.eu/tenant-service:latest .

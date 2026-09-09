@@ -15,7 +15,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IInitService, InitService>();
-        services.AddScoped<Domain.Security.IPasswordHasher, BCryptPasswordHasher>();
+        services.AddSingleton<Domain.Security.IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
