@@ -4,6 +4,8 @@ namespace TenantService.API;
 
 public class ChangePasswordRequest : ApiRequestBase
 {
+    public Guid UserId { get; set; } = Guid.Empty;
+
     public string Username { get; set; } = string.Empty;
     
     public string NewPassword { get; set; } = string.Empty; 

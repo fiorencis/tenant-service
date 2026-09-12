@@ -2,7 +2,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Npgsql.Internal;
 using TenantService.Application;
 
 namespace TenantService.API.Controllers;
@@ -205,11 +204,11 @@ public class InfraController : TenantBaseController
             return BadRequest(errorMessage);
         }
 
-        var user = await _userService.GetUserByUsernameAsync(request.Username);
+        var user = await _userService.GetUserByIdAsync(request.UserId);
 
         if (user == null)
         {
-            return NotFound($"User {request.Username} not found.");
+            return NotFound($"User {request.UserId} not found.");
         }
 
         user.Password = request.NewPassword;

@@ -164,6 +164,22 @@ if (app.Environment.IsDevelopment())
 
 }
 
+// 1. Istruisci .NET a cercare index.html dentro wwwroot/browser
+app.UseDefaultFiles(new DefaultFilesOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "browser")),
+    RequestPath = ""
+});
+
+// 2. Permetti a .NET di servire i file statici (js, css) da wwwroot/browser
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "browser")),
+    RequestPath = ""
+});
+
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -182,6 +198,6 @@ var localizationOptions = new RequestLocalizationOptions()
 
 app.UseRequestLocalization(localizationOptions);
 
-
+app.MapFallbackToFile("index.html"); 
 app.Run();
             
