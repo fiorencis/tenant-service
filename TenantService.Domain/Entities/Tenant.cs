@@ -7,35 +7,46 @@ public class Tenant
 {
     public Tenant()
     {
-        Users = new List<User>();
-        Id = $@"tnn_{Guid.NewGuid().ToString()}";
+        //Users = new List<User>();
+        Id = Guid.NewGuid();
+        Code = $@"tnn_{this.Id.ToString().Substring(0, 8)}";
         Name = $@"Tenant {Id}";
+        TaxCode = $@"TAXCODE";
+        Email = "name@domain.ext";
+        SubscriptionDate = DateTime.Now;
+        DisposalDate = null;
+        Status = TenantStatus.Inactive;
+        Notes = null;   
     }
 
-    public Tenant(string id, string name, string description, TenantStatus status) : this()
+    public Tenant(string code, string name, string taxCode, string email, TenantStatus status) : this()
     {
-        Id = id;
+        Code = code;
         Name = name;
-        Description = description;
+        TaxCode = taxCode;
+        Email = email;
         Status = status;
-        CreatedAt = DateTime.UtcNow;
     }
 
-    public Tenant(string id, string name, string description, TenantStatus status, DateTime createdAt) : this(id, name, description, status)
+    public Tenant(string code, string name, string taxCode, string email, DateTime subscriptionDate, TenantStatus status) 
+        : this(code, name, taxCode, email, status)
     {
-        CreatedAt = createdAt;
+        SubscriptionDate = subscriptionDate;
     }
-    
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string? Description { get; set; }
-    public TenantStatus Status { get; set; }  // Enum dal dominio
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+
+    public Guid Id { get; set; }  //ID that identifies tenant company example: fiorencis
+    public string Code { get; set; }  //string ID that identifies tenant company example: fiorencis
+    public string Name { get; set; } // Tenant company name example: Fiorencis srl
+    public string TaxCode { get; set; }
+    public string Email { get; set; }
+    public DateTime SubscriptionDate { get; set; }
+    public DateTime? DisposalDate { get; set; }
+    public string? Notes { get; set; } // description
+    public TenantStatus Status { get; set; }  // Enum 
     
     // Logica di dominio e validazioni
     public bool IsActive => Status == TenantStatus.Active;
     
-    // Relazioni con altri entities
-    public ICollection<User> Users { get; set; }
+    // Users that has access to tenants data form
+    //public ICollection<User> Users { get; set; }
 }

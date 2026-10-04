@@ -39,4 +39,11 @@ public static class UserMapping
         Status = (int)user.Status,
         PasswordHash = user.PasswordHash
     };
+
+    public static UserDto ToUsernameDto(this User user) => new()
+    {
+        Id = user.Id.ToString(),
+        Username = user.Username,
+        Status = (int)user.Status
+    };
 }

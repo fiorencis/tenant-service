@@ -1,7 +1,7 @@
 ﻿using TenantService.Application.DTOs;
 using TenantService.Application.Extensions;
 
-namespace TenantService.Application;
+namespace TenantService.Application.Services;
 
 public interface IUserService : IApplicationService
 {
@@ -24,4 +24,6 @@ public interface IUserService : IApplicationService
 	Task<string> GetUserImagePath(Guid userId);
 
     Task<bool> VerifyUserPasswordAsync(string userId, string password);
+
+    Task<UserDto[]> GetUsersAsync();
 }

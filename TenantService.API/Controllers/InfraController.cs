@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using TenantService.Application;
+using TenantService.Application.Services;
 
 namespace TenantService.API.Controllers;
 
@@ -60,7 +61,7 @@ public class InfraController : TenantBaseController
             return Ok(result);    
     }
 
-    [HttpPost("add-user")]
+    [HttpPost("users")]
     public async Task<IActionResult> AddUser([FromBody] UserOperationRequest request)
     {
         _logger.LogWarning($"Adding new User {request.User.Username}");
@@ -70,18 +71,18 @@ public class InfraController : TenantBaseController
         return Ok(new { Id = userId });
     }
 
-    [HttpPost("update-user")]
+    [HttpPut("users/{id}")]
     public async Task<IActionResult> UpdateUser([FromBody] UserOperationRequest request)
     {
         _logger.LogWarning($"Updating User {request.User.Username}");
 
         await _userService.UpdateUserAsync(request.User);
 
-        return Ok();
+        return Ok(request.User);
     }
 
 
-    [HttpPost("delete-user")]
+    [HttpDelete("users")]
     public async Task<IActionResult> DeleteUser([FromBody] UserOperationRequest request)
     {
         _logger.LogWarning($"Deleting User {request.User.Username}");
@@ -100,6 +101,19 @@ public class InfraController : TenantBaseController
 
         return Ok(user);
     }
+
+
+    [HttpPost("get-user-by-id")]
+    public async Task<IActionResult> GetUserById([FromBody] UserOperationRequest request)
+    {
+        _logger.LogInformation($"Getting User {request.User.Id}");
+
+        var user = await _userService.GetUserByIdAsync(Guid.Parse(request.User.Id));
+
+        return Ok(user);
+    }
+
+
 
     [HttpGet("{id}/avatar")]
     public async Task<IActionResult> GetAvatar(Guid id)
@@ -260,7 +274,12 @@ public class InfraController : TenantBaseController
         
     }
 
-
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _userService.GetUsersAsync();
+        return Ok(new { users = users, success = true, message = "Users list" });
+    }
 
     [AllowAnonymous]
     [HttpGet("test")]

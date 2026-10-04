@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Principal;
+using Microsoft.EntityFrameworkCore;
 using TenantService.Domain.Entities;
 using TenantService.Domain.Enums;
 
@@ -17,7 +18,9 @@ public class TenantDbContext : DbContext
 
      protected override void OnModelCreating(ModelBuilder modelBuilder)
      {
-          // DbUpdate entity configuration
+          // ===========================================
+          //  DbUpdate entity configuration
+          // ===========================================
           modelBuilder.Entity<DbUpdate>()
                .ToTable("dbupdate", "infra") 
                .HasKey(u => u.Id).HasName("dbupdate_pkey");
@@ -45,6 +48,9 @@ public class TenantDbContext : DbContext
                .HasIndex(u => u.Version)
                .IsUnique();
 
+          // ===========================================
+          //  User entity configuration
+          // ===========================================
           modelBuilder.Entity<User>()
                .ToTable("user", "infra") 
                .HasKey(u => u.Id).HasName("user_pkey"); 
@@ -94,9 +100,9 @@ public class TenantDbContext : DbContext
                .IsRequired().HasDefaultValue(UserStatus.Active);
 
 
-          // RefreshToken entity
           // ===========================================
-          
+          //  RefreshToken entity configuration
+          // ===========================================
           modelBuilder.Entity<RefreshToken>()
                .ToTable("refreshtoken", "infra") 
                .HasKey(u => u.Id).HasName("refresh_token_pkey"); 
@@ -136,6 +142,67 @@ public class TenantDbContext : DbContext
                .HasColumnName("isrevoked")
                .HasColumnType("boolean")
                .IsRequired();
+
+          
+          // ===========================================
+          //  Tenant entity configuration
+          // ===========================================
+          modelBuilder.Entity<Tenant>()
+               .ToTable("tenant", "application") 
+               .HasKey(u => u.Id).HasName("tenant_pkey"); 
+               
+          modelBuilder.Entity<Tenant>() 
+               .Property(u => u.Id)
+               .HasColumnName("id")
+               .HasColumnType("uuid")
+               .IsRequired();
+          
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.Code)
+               .HasColumnName("code")
+               .HasColumnType("varchar(24)")
+               .IsRequired();
+
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.Name)
+               .HasColumnName("name")
+               .HasColumnType("varchar(256)")
+               .IsRequired();
+
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.TaxCode)
+               .HasColumnName("taxcode")
+               .HasColumnType("varchar(16)")
+               .IsRequired();
+
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.Email)
+               .HasColumnName("email")
+               .HasColumnType("varchar(64)")
+               .IsRequired();
+
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.SubscriptionDate)
+               .HasColumnName("subscriptiondate")
+               .HasColumnType("date")
+               .IsRequired();
+
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.DisposalDate)
+               .HasColumnName("disposaldate")
+               .HasColumnType("date");
+
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.Status)
+               .HasColumnName("status")
+               .HasColumnType("smallint")
+               .IsRequired();
+          
+          modelBuilder.Entity<Tenant>()
+               .Property(u => u.Notes)
+               .HasColumnName("notes")
+               .HasColumnType("varchar(max)");
+
      }
 
 }

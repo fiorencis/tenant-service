@@ -4,14 +4,12 @@ public class UserDto
 {
     public string? Id { get; set; }
     public string? Username { get; set; }
-    public string? Email { get; set; }
-    public string? FullName { get; set; }
-    public int Status { get; set; }
-    
+    public string? Email { get; set; } = null;
+    public string? FullName { get; set; } = null;
+    public int Status { get; set; } = 0;
     public bool Admin { get; set; } = false;
-
-    public string? Password { get; set; }
-    public string? PasswordHash { get; set; }
+    public string? Password { get; set; } = null;
+    public string? PasswordHash { get; set; } = null;
 
     public override string ToString()
     {

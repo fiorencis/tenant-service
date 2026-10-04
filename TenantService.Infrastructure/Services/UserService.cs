@@ -10,6 +10,7 @@ using TenantService.Application;
 using TenantService.Application.DTOs;
 using TenantService.Application.Extensions;
 using TenantService.Application.Repositories;
+using TenantService.Application.Services;
 using TenantService.Domain;
 using TenantService.Domain.Entities;
 using TenantService.Domain.Exceptions;
@@ -62,6 +63,9 @@ public class UserService : ApplicationService, IUserService
 		var existingUser = user.FirstOrDefault()!;
 
 		// and checks the password
+		//var hpwd = _passwordHasher.HashPassword(password);
+
+
 		if(_passwordHasher.VerifyPassword(password, existingUser.PasswordHash))
 		{
 			return Result<Guid>.Success(existingUser.Id);
@@ -82,7 +86,8 @@ public class UserService : ApplicationService, IUserService
 
 		if (!Guid.TryParse(user.Id, out var userId))
 		{
-			throw new ArgumentException("Invalid user id.", nameof(user));
+			userId = Guid.NewGuid();
+			//throw new ArgumentException("Invalid user id.", nameof(user));
 		}
 
 		var normalizedUsername = user.Username?.Trim();
@@ -216,12 +221,21 @@ public class UserService : ApplicationService, IUserService
 	}
 
 
+	public async Task<UserDto[]> GetUsersAsync()
+	{
+		var users = await _userRepository.ListAsync();
+		UserDto[] usernames = new UserDto[users.Count()];
 
+		var cnt = 0;
 
+		foreach (var user in users.OrderBy(c => c.Username))
+		{
+			usernames[cnt] = user.ToUsernameDto();
+			cnt++;
+		}
 
-
-
-
+		return usernames;
+	}
 
 
 	public async Task<string> GenerateJwtTokenAsync(Guid userId)

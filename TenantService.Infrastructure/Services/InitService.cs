@@ -6,6 +6,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using TenantService.Application;
 using TenantService.Application.DTOs;
+using TenantService.Application.Services;
 using TenantService.Domain;
 using TenantService.Domain.Entities;
 using TenantService.Domain.Enums;

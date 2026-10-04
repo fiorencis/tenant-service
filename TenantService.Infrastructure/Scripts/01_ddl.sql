@@ -14,6 +14,9 @@ CREATE SCHEMA infra
 CREATE SCHEMA application
     AUTHORIZATION fiorencis;
 
+
+-- infra schema tables
+-- database update tracking table to keep track of applied database migrations
 CREATE TABLE IF NOT EXISTS infra.dbupdate
 (
     id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
@@ -28,7 +31,7 @@ ALTER TABLE IF EXISTS infra.dbupdate OWNER to fiorencis;
 CREATE TABLE IF NOT EXISTS infra.user
 (
     id uuid NOT NULL,
-    username character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    username character varying(64) COLLATE pg_catalog."default" NOT NULL,
     fullName character varying(256) COLLATE pg_catalog."default" NOT NULL,
     email character varying(256) COLLATE pg_catalog."default" NOT NULL,
     passwordHash character varying(128) COLLATE pg_catalog."default",
@@ -41,71 +44,13 @@ ALTER TABLE IF EXISTS infra.user OWNER to fiorencis;
 
 CREATE TABLE IF NOT EXISTS infra.acl
 (
-    user_id uuid NOT NULL,
-    tenant_id character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    userId uuid NOT NULL,
+    tenantId uuid NOT NULL,
     write boolean NOT NULL,
-    CONSTRAINT acl_pkey PRIMARY KEY (user_id, tenant_id)
+    CONSTRAINT acl_pkey PRIMARY KEY (userId, tenantId)
 ) TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS infra.acl OWNER to fiorencis;    
-
-
--- Table: application.tenant - tenants' information
-CREATE TABLE IF NOT EXISTS application.tenant
-(
-    id character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(256) COLLATE pg_catalog."default" NOT NULL,
-    tax_code character varying(16) COLLATE pg_catalog."default" NOT NULL,
-    subscription_date date NOT NULL DEFAULT CURRENT_DATE,
-    subscriber_email character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    license_id uuid NOT NULL,
-    disposal_date date,
-    status smallint NOT NULL,
-    CONSTRAINT tenant_pkey PRIMARY KEY (id)
-) TABLESPACE pg_default;    
-
-ALTER TABLE IF EXISTS application.tenant OWNER to fiorencis; 
-
-CREATE TABLE IF NOT EXISTS application.license
-(
-    id uuid NOT NULL,
-    serialNumber character varying(32) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    max_users integer NOT NULL,
-    CONSTRAINT tenant_license_pkey PRIMARY KEY (id)
-) TABLESPACE pg_default; 
-
-ALTER TABLE IF EXISTS application.license OWNER to fiorencis;
-
-
-ALTER TABLE IF EXISTS infra.user
-    ADD CONSTRAINT user_ukey_username UNIQUE (username);
-
-
--- foreign keys
-ALTER TABLE IF EXISTS infra.acl
-    ADD CONSTRAINT acl_fkey_tenant FOREIGN KEY (tenant_id)
-    REFERENCES application.tenant (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS infra.acl
-    ADD CONSTRAINT acl_fkey_user FOREIGN KEY (user_id)
-    REFERENCES infra.user (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS application.tenant
-    ADD CONSTRAINT tenant_fkey_license FOREIGN KEY (license_id)
-    REFERENCES application.license (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION 
-    NOT VALID;    
-
 
 CREATE TABLE IF NOT EXISTS infra.refreshtoken 
 (
@@ -116,5 +61,72 @@ CREATE TABLE IF NOT EXISTS infra.refreshtoken
     createdat TIMESTAMPTZ NOT NULL,
     isrevoked boolean NOT NULL,
     CONSTRAINT refresh_token_pkey PRIMARY KEY (id)
+) TABLESPACE pg_default;
 
-)
+ALTER TABLE IF EXISTS infra.refreshtoken OWNER to fiorencis;
+
+-- application schema tables
+-- Table: application.tenant - tenants' information
+CREATE TABLE IF NOT EXISTS application.tenant
+(
+    id uuid NOT NULL,
+    code character varying(24) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(256) COLLATE pg_catalog."default" NOT NULL,
+    taxCode character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    subscriptionDate date NOT NULL DEFAULT CURRENT_DATE,
+    disposalDate date,
+    status smallint NOT NULL,
+    notes text NULL,
+    CONSTRAINT tenant_pkey PRIMARY KEY (id)
+) TABLESPACE pg_default;    
+
+ALTER TABLE IF EXISTS application.tenant OWNER to fiorencis; 
+
+-- license table to store license information for tenants
+CREATE TABLE IF NOT EXISTS application.license
+(
+    id uuid NOT NULL,
+    tenantid uuid NOT NULL,
+    serialNumber character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    maxusers integer NOT NULL,
+    CONSTRAINT tenant_license_pkey PRIMARY KEY (id)
+) TABLESPACE pg_default; 
+
+ALTER TABLE IF EXISTS application.license OWNER to fiorencis;
+
+-- constraints and indexes
+-- username unique constraint
+ALTER TABLE IF EXISTS infra.user
+    ADD CONSTRAINT user_ukey_username UNIQUE (username);
+
+ALTER TABLE IF EXISTS application.tenant
+    ADD CONSTRAINT tenant_ukey_code UNIQUE (code);
+
+-- foreign keys
+-- tenant foreign key constraints for ACL table
+ALTER TABLE IF EXISTS infra.acl
+    ADD CONSTRAINT acl_fkey_tenant FOREIGN KEY (tenantid)
+    REFERENCES application.tenant (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+-- user foreign key constraints for ACL table
+ALTER TABLE IF EXISTS infra.acl
+    ADD CONSTRAINT acl_fkey_user FOREIGN KEY (userid)
+    REFERENCES infra.user (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+-- license foreign key constraints for tenant table
+ALTER TABLE IF EXISTS application.license
+    ADD CONSTRAINT license_fkey_tenant FOREIGN KEY (tenantid)
+    REFERENCES application.tenant (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
