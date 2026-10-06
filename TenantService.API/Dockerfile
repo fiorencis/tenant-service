@@ -27,3 +27,5 @@ ENTRYPOINT ["dotnet", "TenantService.API.dll"]
 
 # Or if you want to specify the Dockerfile path explicitly, use:
 # docker build -f .\TenantService.API\Dockerfile -t tenant-service .
+
+# docker tag tenant-service:latest dhub.fiorencis.eu/tenant-service:latest

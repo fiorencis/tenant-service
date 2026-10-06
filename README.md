@@ -31,3 +31,14 @@ dotnet run
 # Build docker image
 Execute in TenantService.API folder:
 docker build -t dhub.fiorencis.eu/tenant-service:latest .
+
+
+
+# Create docker registry on my server
+docker run -d -p 5000:5000 --restart=always --name mio-registry registry:2
+
+# Tagga l'immagine
+docker tag mia-immagine:latest IP_DEL_TUO_SERVER:5000/mia-immagine:latest
+
+# Push dell'immagine
+docker push IP_DEL_TUO_SERVER:5000/mia-immagine:latest
